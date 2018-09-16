@@ -33,7 +33,6 @@ $(function () {
         btn.removeClass("a_on").eq(i).addClass("a_on");
 
     });
-    // btn.triggerHandler("mouseenter");
 
     //轮播图
 
@@ -77,8 +76,43 @@ $(function () {
     });
     banner.mouseleave(function () {
         t = setInterval(move, 2000);
-    })
+    });
+    dots.click(function () {
+        let index = $(this).index();
+        imgs.css("opacity", "0").eq(index).css("opacity", "1");
+        dots.removeClass("spot").eq(index).addClass("spot");
+    });
 
+    //小米倒计时
+    let spans = $(".phone .left .ph_nav .box");
+    times(spans);
+
+    function times(spans) {
+        setInterval(setDate, 1000);
+
+        function setDate() {
+            let arr = fn();
+            spans.get().forEach(function (e, i) {
+                spans.eq(i).html(arr[i]);
+            })
+        }
+
+        function fn() {
+            let arr = [];
+            let now = new Date();
+            let future = new Date(2018, 9, 1, 18, 0, 0);
+            let time = Math.floor((future.getTime() - now.getTime()) / 1000);
+
+            let hour = Math.floor(time % (30 * 24 * 60 * 60) % (24 * 60 * 60) / (60 * 60));
+            arr.push(hour);
+            let m = Math.floor(time % (30 * 24 * 60 * 60) % (24 * 60 * 60) % (60 * 60) / (60));
+            arr.push(m);
+            let s = Math.floor(time % (30 * 24 * 60 * 60) % (24 * 60 * 60) % (60 * 60) % (60));
+            arr.push(s);
+
+            return arr;
+        }
+    }
 
     // 小米闪购
 
@@ -136,18 +170,132 @@ $(function () {
 
     // 置顶
 
-    // let back = $(".fixed .BTN");//获取返回顶部的小盒子
-    // $(window).scroll(function () {
-    //     let bh = back.scroll();
-    //     console.log(bh);
-    //     if (bh > 1200) {
-    //         back.fadeIn("slow", function () {
-    //
-    //         })
-    //     } else {
-    //         back.fadeOut("slow", function () {
-    //
-    //         })
-    //     }
-    })
-})
+    let back = $(".fixed .BTN");//获取返回顶部的小盒子
+    back.click(function () {
+        $(window).scrollTop(0);
+    });
+    $(window).scroll(function () {
+        let bh = $(window).scrollTop();
+        if (bh > 1200) {
+            back.fadeIn("slow");
+        } else {
+            back.fadeOut("slow");
+        }
+    });
+
+    //视频移入移出
+
+    let imgv = $(".video .content-v .box-v img");
+    let play = $(".video .content-v .box-v .play");
+
+    imgv.mouseenter(function () {
+        let i = $(this).parents().index();
+        play.eq(i).css({border: "2px solid #ff6700", background: "#ff6700"})
+    });
+    imgv.mouseleave(function () {
+        let i = $(this).parents().index();
+        play.eq(i).css({border: "2px solid #fff", background: "rgba(0, 0, 0, 0.6)"})
+    });
+
+    //小轮播图
+
+    function small(boxSm, widthSm, dotSm, leftBth, rightBth) {
+        let flag = true;
+        let nowS = 0;
+        let nextS = 0;
+        boxSm.first().css({left: "0"});
+
+        function moveR() {
+            if (nextS === boxSm.length - 1) {
+                nextS=0;
+            }
+            nextS++;
+            boxSm.eq(nextS).css({left: widthSm + "px"});
+            boxSm.eq(nowS).animate({left: -widthSm}, 1000);
+            boxSm.eq(nextS).animate({
+                left: "0"
+            } ,1000,function () {
+                flag = true;
+            });
+            dotSm.eq(nowS).removeClass("uu-selected");
+            dotSm.eq(nextS).addClass("uu-selected");
+            nowS = nextS;
+        }
+
+        function moveL() {
+            if (nextS === 0) {
+                nextS=boxSm.length - 1;
+            }
+            nextS--;
+            boxSm.eq(nextS).css({left: -widthSm + "px"});
+            boxSm.eq(nowS).animate({left: widthSm+"px"},1000);
+            boxSm.eq(nextS).animate({left: "0"}, 1000,function () {
+                flag = true;
+            });
+            dotSm.eq(nowS).removeClass("uu-selected");
+            dotSm.eq(nextS).addClass("uu-selected");
+            nowS = nextS;
+        }
+
+        leftBth.click(function () {
+            if (!flag) {
+                return;
+            }
+            if (nextS === 0) {
+                return;
+            }
+            flag=false;
+            moveL();
+
+        });
+        rightBth.click(function () {
+            if (!flag) {
+                return;
+            }
+            if (nextS === boxSm.length - 1) {
+                return;
+            }
+            flag=false;
+            moveR();
+        });
+
+        // 鼠标点击轮播点
+        dotSm.click(function () {
+            let i = $(this).index();
+            boxSm.siblings().css({left: widthSm + "px"}).eq(i).css({left: "0"});
+            dotSm.siblings().removeClass("uu-selected").eq(i).addClass("uu-selected");
+            nextS = i;
+            nowS = i;
+        })
+    }
+
+    let boxSm = $(".nav .content-o .box-o-1 .biger .navSm");
+    let widthSm = boxSm.width();
+    let dotSm = $(".box-o-1 #uu ul li");
+    let leftBth = $(".nav .content-o .box-o-1 .o-leftBth");
+    let rightBth = $(".nav .content-o .box-o-1 .o-rightBth");
+    small(boxSm, widthSm, dotSm, leftBth, rightBth);
+
+    let boxSm1 = $(".nav .content-o .box-o-2 .biger .navSm");
+    let widthSm1 = boxSm.width();
+    let dotSm1 = $(".box-o-2 #uu ul li");
+    let leftBth1 = $(".nav .content-o .box-o-2 .o-leftBth");
+    let rightBth1 = $(".nav .content-o .box-o-2 .o-rightBth");
+    small(boxSm1, widthSm1, dotSm1, leftBth1, rightBth1);
+
+    let boxSm2 = $(".nav .content-o .box-o-3 .biger .navSm");
+    let widthSm2 = boxSm.width();
+    let dotSm2 = $(".box-o-3 #uu ul li");
+    let leftBth2 = $(".nav .content-o .box-o-3 .o-leftBth");
+    let rightBth2 = $(".nav .content-o .box-o-3 .o-rightBth");
+    small(boxSm2, widthSm2, dotSm2, leftBth2, rightBth2);
+
+    let boxSm3 = $(".nav .content-o .box-o-4 .biger .navSm");
+    let widthSm3 = boxSm.width();
+    let dotSm3 = $(".box-o-4 #uu ul li");
+    let leftBth3 = $(".nav .content-o .box-o-4 .o-leftBth");
+    let rightBth3 = $(".nav .content-o .box-o-4 .o-rightBth");
+    small(boxSm3, widthSm3, dotSm3, leftBth3, rightBth3);
+
+
+});
